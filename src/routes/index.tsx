@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import GetTask from '@/components/GetTask'
 
 
 export const Route = createFileRoute('/')({
@@ -44,6 +45,8 @@ function App() {
 
     <div>
       Todo
+
+      <GetTask />
     </div>
   )
 }
