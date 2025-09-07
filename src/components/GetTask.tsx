@@ -1,20 +1,16 @@
 import { useState } from 'react';
-import type { Address } from '@/lib/types';
-import { decodeTodoStruct } from '@/lib/DecodeData';
-import { celoRPCUrl, celoToDoContractAddress } from '@/lib/constants/contract';
+import { TODO_ABI, celoToDoContractAddress } from '@/lib/constants/contract';
+import { publicClient } from '@/lib/client';
 
 function GetTask() {
     const [task, setTask] = useState<{
-        id: string;
+        id: bigint;
         description: string;
         completed: boolean;
     } | null>(null);
     const [loading, setLoading] = useState(false);
     const [taskId, setTaskId] = useState('');
     const [error, setError] = useState('');
-
-
-
 
     const getTask = async () => {
         if (!taskId.trim()) {
@@ -25,48 +21,27 @@ function GetTask() {
         try {
             setLoading(true);
             setError('');
-            const data = '0x1d65e77e' + parseInt(taskId).toString(16).padStart(64, '0');
+            const taskIdBigInt = BigInt(taskId);
 
-            const response = await fetch(celoRPCUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    method: 'eth_call',
-                    params: [{
-                        to: celoToDoContractAddress,
-                        data: data
-                    }, 'latest'],
-                    id: 1
-                })
+            const response = await publicClient.readContract({
+                address: celoToDoContractAddress,
+                abi: TODO_ABI,
+                functionName: 'getTask',
+                args: [taskIdBigInt],
             });
 
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.error.message);
-            }
+            const taskData = response;
+            console.log("taskData: ", taskData);
 
-            const taskData = result.result;
-            if (taskData === '0x') {
-                setTask(null);
-                setError('Task not found');
-                return;
-            }
+            setTask({
+                id: taskData.id,
+                description: taskData.description,
+                completed: taskData.completed
+            });
 
-            const decoded = decodeTodoStruct(taskData as Address);
-            if (decoded) {
-                const [taskInfo] = decoded;
-                setTask({
-                    id: taskInfo.id.toString(),
-                    description: taskInfo.description,
-                    completed: taskInfo.completed
-                });
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            setError('Error fetching task. See console for details.');
+        } catch (err) {
+            console.error('Error:', err);
+            setError('ERROR FETCHING TASK: ' + (err as Error).message);
             setTask(null);
         } finally {
             setLoading(false);
