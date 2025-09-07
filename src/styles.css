@@ -132,7 +132,7 @@ code {
 /* Dark theme preference */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background:rgb(28, 31, 37);
+    --background:rgb(38, 39, 39);
     --foreground: #f8fafc;
     --card: #1e293b;
     --card-foreground: #f8fafc;
