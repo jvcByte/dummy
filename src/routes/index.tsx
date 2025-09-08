@@ -1,13 +1,28 @@
 import { createFileRoute } from '@tanstack/react-router'
 import GetTask from '@/components/GetTask'
+import CreateTask from '@/components/CreateTask'
+import { walletClient } from '@/lib/client'
 
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
+let accounts: Array<`0x${string}`> = [];
+
+async function getAccounts() {
+  accounts = await walletClient.getAddresses();
+  if (accounts.length > 0) {
+    console.log('Connected wallet:', accounts[0]);
+  } else {
+    alert('No wallet connected');
+    console.log('No wallet connected');
+  }
+}
+
 function App() {
-  return (
+  getAccounts();
+    return (
     // <div className='w-[100vw] h-[100vh] text-white px-8 py-4'>
     //   <Header accounts={accounts} />
     //   {accounts.length > 0 ? (
@@ -47,6 +62,7 @@ function App() {
       Todo
 
       <GetTask />
+      <CreateTask accounts={accounts} />
     </div>
   )
 }

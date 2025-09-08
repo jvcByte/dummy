@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BaseError, ContractFunctionRevertedError } from 'viem';
 import { TODO_ABI, celoToDoContractAddress } from '@/lib/constants/contract';
 import { publicClient } from '@/lib/client';
 
@@ -41,8 +42,14 @@ function GetTask() {
 
         } catch (err) {
             console.error('Error:', err);
-            setError('ERROR FETCHING TASK: ' + (err as Error).message);
-            setTask(null);
+            if (err instanceof BaseError) {
+                const revertError = err.walk(e => e instanceof ContractFunctionRevertedError)
+                if (revertError instanceof ContractFunctionRevertedError) {
+                    const errorName = revertError.reason ?? 'Unknown error'
+                    setError('Error fetching task: ' + errorName);
+                    setTask(null);
+                }
+            }
         } finally {
             setLoading(false);
         }
