@@ -3,6 +3,7 @@ import GetTask from '@/components/GetTask'
 import CreateTask from '@/components/CreateTask'
 import { walletClient } from '@/lib/client'
 import CompleteTask from '@/components/CompleteTask'
+import UpdateTask from '@/components/UpdateTask'
 
 
 export const Route = createFileRoute('/')({
@@ -37,7 +38,7 @@ function App() {
           <CompleteTask accounts={accounts} />
         </div>
         <div className="w-full md:w-1/3">
-          <CompleteTask accounts={accounts} />
+          <UpdateTask accounts={accounts} />
         </div>
       </div>
     </div>
