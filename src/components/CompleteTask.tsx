@@ -3,6 +3,7 @@ import {  BaseError, ContractFunctionRevertedError } from 'viem';
 import type {Address} from 'viem';
 import { TODO_ABI, celoToDoContractAddress } from '@/lib/constants/contract';
 import { publicClient, walletClient } from '@/lib/client';
+import { connectAccount } from '@/lib/constants/helper-functions';
 
 interface CompleteTaskProps {
     accounts: Array<Address>;
@@ -15,25 +16,13 @@ function CompleteTask({ accounts }: CompleteTaskProps) {
     const [success, setSuccess] = useState('');
     const [currentAccount, setCurrentAccount] = useState<`0x${string}` | null>(null);
 
-    const connectAccount = async () => {
-        try {
-            if (accounts.length === 0) {
-                const [address] = await walletClient.requestAddresses();
-                setCurrentAccount(address);
-                return address;
-            } else {
-                setCurrentAccount(accounts[0]);
-                return accounts[0];
-            }
-        } catch (errors) {
-            console.error('Error connecting wallet:', errors);
-            throw errors;
-        }
-    }
-
 
     const completeTask = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (accounts.length <= 0) {
+            setCurrentAccount(await connectAccount());
+        }
 
         if (!taskId.trim()) {
             setError('Please enter a task ID');
@@ -44,7 +33,6 @@ function CompleteTask({ accounts }: CompleteTaskProps) {
             setLoading(true);
             setError('');
             setSuccess('');
-            const account = !currentAccount ? await connectAccount() : currentAccount;
 
             const taskIdNum = parseInt(taskId, 10);
             if (isNaN(taskIdNum) || taskIdNum < 0) {
@@ -58,7 +46,7 @@ function CompleteTask({ accounts }: CompleteTaskProps) {
                 abi: TODO_ABI,
                 functionName: 'completeTask',
                 args: [taskIdBigInt],
-                account: account,
+                account: currentAccount,
             });
 
             console.log('Simulation result:', result);
@@ -68,7 +56,7 @@ function CompleteTask({ accounts }: CompleteTaskProps) {
                 abi: TODO_ABI,
                 functionName: 'completeTask',
                 args: [taskIdBigInt],
-                account: account,
+                account: currentAccount,
             });
             console.log('Transaction hash:', hash);
             console.log('Waiting for confirmation...');
