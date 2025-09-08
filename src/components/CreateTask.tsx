@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import type { Address } from 'viem';
 import { TODO_ABI, celoToDoContractAddress } from '@/lib/constants/contract';
 import { publicClient, walletClient } from '@/lib/client';
+import { connectAccount } from '@/lib/constants/helper-functions';
 
 interface CreateTaskProps {
     accounts: Array<Address>;
@@ -16,24 +17,13 @@ function CreateTask({ accounts }: CreateTaskProps) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    const connectAccount = async () => {
-        try {
-            if (accounts.length === 0) {
-                const [address] = await walletClient.requestAddresses();
-                setCurrentAccount(address);
-                return address;
-            } else {
-                setCurrentAccount(accounts[0]);
-                return accounts[0];
-            }
-        } catch (errors) {
-            console.error('Error connecting wallet:', errors);
-            throw errors;
-        }
-    }
 
     const createTask = async (e: FormEvent) => {
         e.preventDefault();
+
+        if (accounts.length <= 0) {
+            setCurrentAccount(await connectAccount());
+        }
 
         if (!description.trim()) {
             setError('Please enter a task description');
@@ -44,7 +34,6 @@ function CreateTask({ accounts }: CreateTaskProps) {
             setLoading(true);
             setError('');
             setSuccess('');
-            const account = !currentAccount ? await connectAccount() : currentAccount;
 
 
             const { result } = await publicClient.simulateContract({
@@ -52,7 +41,7 @@ function CreateTask({ accounts }: CreateTaskProps) {
                 abi: TODO_ABI,
                 functionName: 'createTask',
                 args: [description],
-                account: account,
+                account: currentAccount,
             });
 
             console.log('Simulation result:', result);
@@ -62,7 +51,7 @@ function CreateTask({ accounts }: CreateTaskProps) {
                 abi: TODO_ABI,
                 functionName: 'createTask',
                 args: [description],
-                account: account,
+                account: currentAccount,
             });
             console.log('Transaction hash:', hash);
             console.log('Waiting for confirmation...');
