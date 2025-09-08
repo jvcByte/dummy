@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import GetTask from '@/components/GetTask'
 import CreateTask from '@/components/CreateTask'
 import { walletClient } from '@/lib/client'
+import CompleteTask from '@/components/CompleteTask'
 
 
 export const Route = createFileRoute('/')({
@@ -22,47 +23,23 @@ async function getAccounts() {
 
 function App() {
   getAccounts();
-    return (
-    // <div className='w-[100vw] h-[100vh] text-white px-8 py-4'>
-    //   <Header accounts={accounts} />
-    //   {accounts.length > 0 ? (
-    //     <div className="mt-6 p-4 bg-green-50 rounded-lg">
-    //       <p className="font-medium text-green-800">Connected Wallet:</p>
-    //       <p className="text-sm font-mono text-gray-600 break-all">{accounts[0]}</p>
-    //     </div>
-    //   ) : (
-    //     <div className="mt-6 p-4 bg-yellow-50 rounded-lg text-center">
-    //       <p className="text-yellow-800 mb-2">Wallet not connected</p>
-    //       <button
-    //         onClick={connectWallet}
-    //         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-    //       >
-    //         Connect Wallet
-    //       </button>
-    //     </div>
-    //   )}
-
-    //   <div className='grid grid-cols-1 md:grid-cols-2 gap-8 w-full p-4'>
-    //     <div className="w-full">
-    //       <CreateTask accounts={accounts} />
-    //     </div>
-    //     <div className="w-full">
-    //       <GetTask />
-    //     </div>
-    //     <div className="w-full">
-    //       <CompleteTask accounts={accounts} />
-    //     </div>
-    //     <div className="w-full">
-    //       <UpdateTask accounts={accounts} />
-    //     </div>
-    //   </div>
-    // </div>
-
+  return (
     <div>
-      Todo
-
-      <GetTask />
-      <CreateTask accounts={accounts} />
+      <h1 className="text-center text-3xl font-bold mt-10 mb-2">ToDo App with Viem</h1>
+      <div className="flex flex-col md:flex-row justify-center gap-4 p-6">
+        <div className="w-full md:w-1/3">
+          <GetTask />
+        </div>
+        <div className="w-full md:w-1/3">
+          <CreateTask accounts={accounts} />
+        </div>
+        <div className="w-full md:w-1/3">
+          <CompleteTask accounts={accounts} />
+        </div>
+        <div className="w-full md:w-1/3">
+          <CompleteTask accounts={accounts} />
+        </div>
+      </div>
     </div>
   )
 }
