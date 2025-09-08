@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BaseError, ContractFunctionRevertedError } from 'viem';
+import type { FormEvent } from 'react';
 import type { Address } from 'viem';
 import { TODO_ABI, celoToDoContractAddress } from '@/lib/constants/contract';
 import { publicClient, walletClient } from '@/lib/client';
@@ -31,7 +32,7 @@ function CreateTask({ accounts }: CreateTaskProps) {
         }
     }
 
-    const createTask = async (e: React.FormEvent) => {
+    const createTask = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!description.trim()) {
