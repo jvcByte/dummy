@@ -14,7 +14,7 @@ interface MyRouterContext {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
-    <>
+    <div className='max-w-[1450px] mx-auto mt-2 md:mt-10'>
       <Header />
       <Outlet />
       <TanstackDevtools
@@ -29,6 +29,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           TanStackQueryDevtools,
         ]}
       />
-    </>
+    </div>
   ),
 })

@@ -7,7 +7,7 @@ async function getAccounts() {
   if (accounts.length > 0) {
     console.log('Connected wallet:', accounts[0]);
   } else {
-    alert('No wallet connected');
+    // alert('connect wallet to use this app');
     console.log('No wallet connected');
   }
 }
