@@ -13,7 +13,7 @@ function CreateTask({ accounts }: CreateTaskProps) {
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
+    const [success, setSuccess] = useState('');
 
     const connectAccount = async () => {
         try {
@@ -42,7 +42,7 @@ function CreateTask({ accounts }: CreateTaskProps) {
         try {
             setLoading(true);
             setError('');
-            setSuccess(false);
+            setSuccess('');
             const account = !currentAccount ? await connectAccount() : currentAccount;
 
 
@@ -64,16 +64,55 @@ function CreateTask({ accounts }: CreateTaskProps) {
                 account: account,
             });
             console.log('Transaction hash:', hash);
+            console.log('Waiting for confirmation...');
 
             const receipt = await publicClient.waitForTransactionReceipt({
                 hash,
-                confirmations: 1,
+                confirmations: 5,
                 timeout: 60_000,
             });
             console.log('Reciept status: ', receipt.status);
+            console.log('Transaction confirmed in block:', receipt.blockNumber);
+
+            const latestBlock = await publicClient.getBlockNumber();
+            console.log('Latest block:', latestBlock);
+
+            const fromBlock = receipt.blockNumber > 2n ? receipt.blockNumber - 2n : 0n;
+            const toBlock = receipt.blockNumber + 2n > latestBlock ? latestBlock : receipt.blockNumber + 2n;
+
+            console.log(`Querying events from block ${fromBlock} to ${toBlock}`);
+
+            const logs = await publicClient.getContractEvents({
+                abi: TODO_ABI,
+                address: celoToDoContractAddress,
+                eventName: 'TaskCreated',
+                fromBlock,
+                toBlock
+            });
+
+            console.log('Found events:', logs);
+
+            if (logs.length === 0) {
+                console.warn('No TaskCreated events found in the queried blocks');
+                // Try one more time with just the transaction's block
+                try {
+                    const singleBlockLogs = await publicClient.getContractEvents({
+                        abi: TODO_ABI,
+                        address: celoToDoContractAddress,
+                        eventName: 'TaskCreated',
+                        fromBlock: receipt.blockNumber,
+                        toBlock: receipt.blockNumber
+                    });
+                    console.log('Single block query results:', singleBlockLogs);
+                } catch (err) {
+                    console.warn('Error querying single block:', err);
+                }
+            } else {
+                console.log('TaskCreated event data:', logs[0].args);
+            }
 
             if (receipt.status === 'success') {
-                setSuccess(true);
+                setSuccess('Task created successfully! ' + 'ID: ' + logs[0].args.id + ' Description: ' + logs[0].args.description);
                 setDescription('');
                 setLoading(false);
             } else {
@@ -138,7 +177,7 @@ function CreateTask({ accounts }: CreateTaskProps) {
 
                     {success && (
                         <div className="p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
-                            <p>Task created successfully! The transaction is being processed.</p>
+                            <p>{success}</p>
                         </div>
                     )}
                 </form>
